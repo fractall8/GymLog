@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GymLog.Api", "GymLog.Api\GymLog.Api.csproj", "{717CC0A2-99EF-474F-9277-14CBECC4849D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{717CC0A2-99EF-474F-9277-14CBECC4849D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{717CC0A2-99EF-474F-9277-14CBECC4849D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{717CC0A2-99EF-474F-9277-14CBECC4849D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{717CC0A2-99EF-474F-9277-14CBECC4849D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
