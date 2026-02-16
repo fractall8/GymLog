@@ -8,26 +8,48 @@ public class ExerciseService(GymLogDbContext context) : IExerciseService
 {
     public async Task<IEnumerable<ExerciseModel>> GetAllAsync(Guid? userId)
     {
-        var exercies = await context.Exercises
-            .Where(e => e.UserId == userId)
-            .Select(e => MapToModel(e))
+        var exercise = await context.Exercises
+            .Where(e => e.UserId == null || e.UserId == userId)
+            .Select(e => new ExerciseModel
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Description = e.Description,
+                MediaUrl = e.MediaUrl,
+                UserId = e.UserId
+            })
+            .AsNoTracking()
             .ToListAsync();
         
-        return exercies;
+        return exercise;
     }
 
-    public async Task<ExerciseModel?> GetByIdAsync(Guid id)
+    public async Task<ExerciseModel?> GetByIdAsync(Guid id, Guid? userId)
     {
-        var exercise = await context.Exercises.FindAsync(id);
-        return MapToModel(exercise);
+        var exercise = await context.Exercises
+            .FindAsync(id);
+
+        if (exercise == null || (exercise.UserId != null && exercise.UserId == userId))
+        {
+            return null;
+        }
+        
+        return new ExerciseModel
+        {
+            Id =  exercise.Id,
+            UserId = exercise.UserId,
+            Name = exercise.Name,
+            Description = exercise.Description,
+            MediaUrl = exercise.MediaUrl
+        };
     }
     
-    public async Task CreateAsync(CreateExerciseModel model)
+    public async Task<ExerciseModel> CreateAsync(CreateExerciseModel model, Guid userId)
     {
         var exercise = new Exercise
         {
             Id = Guid.NewGuid(),
-            UserId = Guid.NewGuid(), // temp
+            UserId = userId,
             Name = model.Name,
             Description = model.Description,
             MediaUrl = model.MediaUrl
@@ -35,18 +57,27 @@ public class ExerciseService(GymLogDbContext context) : IExerciseService
         
         await context.Exercises.AddAsync(exercise);
         await context.SaveChangesAsync();
+
+        return new ExerciseModel
+        {
+            Id = exercise.Id,
+            UserId = exercise.UserId,
+            Name = exercise.Name,
+            Description = exercise.Description,
+            MediaUrl = exercise.MediaUrl
+        };
     }
     
-    public async Task UpdateAsync(UpdateExerciseModel model)
+    public async Task UpdateAsync(UpdateExerciseModel model, Guid id, Guid userId)
     {
-        var exercise = await context.Exercises.FindAsync(model.Id);
+        var exercise = await context.Exercises
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
 
         if (exercise == null)
         {
             return;
         }
         
-        exercise.UserId = model.UserId;
         exercise.Name = model.Name;
         exercise.Description = model.Description;
         exercise.MediaUrl = model.MediaUrl;
@@ -54,9 +85,10 @@ public class ExerciseService(GymLogDbContext context) : IExerciseService
         await context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(Guid id, Guid userId)
     {
-        var exercise = await context.Exercises.FindAsync(id);
+        var exercise = await context.Exercises
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
 
         if (exercise == null)
         {
@@ -65,22 +97,5 @@ public class ExerciseService(GymLogDbContext context) : IExerciseService
         
         context.Exercises.Remove(exercise);
         await context.SaveChangesAsync();
-    }
-
-    private ExerciseModel? MapToModel(Exercise? model)
-    {
-        if (model == null)
-        {
-            return null;
-        }
-        
-        return new ExerciseModel
-        {
-            Id = model.Id,
-            UserId = model.UserId,
-            Name = model.Name,
-            Description = model.Description,
-            MediaUrl = model.MediaUrl
-        };
     }
 }
