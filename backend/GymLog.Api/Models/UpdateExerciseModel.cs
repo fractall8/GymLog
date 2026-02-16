@@ -1,6 +1,6 @@
-﻿namespace GymLog.Api.Entities;
+﻿namespace GymLog.Api.Models;
 
-public class Exercise
+public class UpdateExerciseModel
 {
     public Guid Id { get; set; }
     
@@ -11,6 +11,4 @@ public class Exercise
     public string Description { get; set; }
     
     public string? MediaUrl { get; set; }
-    
-    // Muscle Group
 }
