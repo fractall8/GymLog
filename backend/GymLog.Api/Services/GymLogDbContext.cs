@@ -1,9 +1,11 @@
 ﻿using GymLog.Api.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymLog.Api.Services;
 
-public class GymLogDbContext : DbContext
+public class GymLogDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 {
     public GymLogDbContext(DbContextOptions<GymLogDbContext> options) : base(options) { }
 

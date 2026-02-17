@@ -1,15 +1,17 @@
-﻿using GymLog.Api.Models;
+﻿using System.Security.Claims;
+using GymLog.Api.Models;
 using GymLog.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymLog.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class ExercisesController(IExerciseService exerciseService) : ControllerBase
 {
-    // temp
-    private readonly Guid UserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+    protected Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ExerciseModel>>> GetAllExercises()
