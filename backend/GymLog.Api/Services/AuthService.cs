@@ -40,6 +40,17 @@ public class AuthService(UserManager<ApplicationUser> userManager, IConfiguratio
         
         return GenerateJwtToken(user);
     }
+
+    public async Task<UserModel?> GetMeAsync(Guid userId)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            return null;
+        }
+        
+        return new UserModel(user.Id, user.UserName!, user.Email!);
+    }
     
     private AuthResponse GenerateJwtToken(ApplicationUser user)
     {
