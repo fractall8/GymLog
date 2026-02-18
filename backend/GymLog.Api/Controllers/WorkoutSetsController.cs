@@ -7,16 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace GymLog.Api.Controllers;
 
 [Authorize]
-[ApiController]
 [Route("workouts/{workoutId}/sets")]
-public class WorkoutSetsController(IWorkoutSetService setService) : ControllerBase
+public class WorkoutSetsController(IWorkoutSetService setService) : BaseController
 {
-    protected Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-    
     [HttpPost]
     public async Task<ActionResult<WorkoutSetModel>> AddSet(Guid workoutId, [FromBody] CreateSetModel model)
     {
-        var result = await setService.AddSetAsync(userId: UserId, workoutId: workoutId, model: model);
+        var result = await setService.AddSetAsync(userId: CurrentUserId, workoutId: workoutId, model: model);
 
         if (result == null)
         {
@@ -29,7 +26,7 @@ public class WorkoutSetsController(IWorkoutSetService setService) : ControllerBa
     [HttpDelete("{setId}")]
     public async Task<IActionResult> DeleteSet(Guid setId)
     {
-        await setService.DeleteSetAsync(setId, UserId);
+        await setService.DeleteSetAsync(setId, CurrentUserId);
         return NoContent();
     }
 }

@@ -7,16 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace GymLog.Api.Controllers;
 
 [Authorize]
-[ApiController]
 [Route("[controller]")]
-public class WorkoutsController(IWorkoutService workoutService) : ControllerBase
+public class WorkoutsController(IWorkoutService workoutService) : BaseController
 {
-    protected Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-    
     [HttpGet("active")]
     public async Task<ActionResult<WorkoutModel>> GetActiveWorkout()
     {
-        var workout = await workoutService.GetActiveWorkoutAsync(UserId);
+        var workout = await workoutService.GetActiveWorkoutAsync(CurrentUserId);
 
         if (workout == null)
         {
@@ -29,7 +26,7 @@ public class WorkoutsController(IWorkoutService workoutService) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<WorkoutModel>>> GetAllWorkouts()
     {
-        var workouts = await workoutService.GetWorkoutsAsync(UserId);
+        var workouts = await workoutService.GetWorkoutsAsync(CurrentUserId);
         
         return Ok(workouts);
     }
@@ -37,7 +34,7 @@ public class WorkoutsController(IWorkoutService workoutService) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<WorkoutModel>> CreateWorkout([FromBody] CreateWorkoutModel model)
     {
-        var workout = await workoutService.StartWorkoutAsync(model, UserId);
+        var workout = await workoutService.StartWorkoutAsync(model, CurrentUserId);
 
         if (workout == null)
         {
@@ -50,7 +47,7 @@ public class WorkoutsController(IWorkoutService workoutService) : ControllerBase
     [HttpPatch("finish")]
     public async Task<IActionResult> FinishWorkout()
     {
-        await workoutService.FinishWorkoutAsync(UserId);
+        await workoutService.FinishWorkoutAsync(CurrentUserId);
 
         return NoContent();
     }  

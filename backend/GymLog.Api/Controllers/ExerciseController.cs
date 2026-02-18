@@ -7,16 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace GymLog.Api.Controllers;
 
 [Authorize]
-[ApiController]
 [Route("[controller]")]
-public class ExercisesController(IExerciseService exerciseService) : ControllerBase
+public class ExercisesController(IExerciseService exerciseService) : BaseController
 {
-    protected Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-    
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ExerciseModel>>> GetAllExercises()
     {
-        var exercises = await exerciseService.GetAllAsync(UserId);
+        var exercises = await exerciseService.GetAllAsync(CurrentUserId);
         
         return Ok(exercises);
     }
@@ -24,7 +21,7 @@ public class ExercisesController(IExerciseService exerciseService) : ControllerB
     [HttpGet("{id}")]
     public async Task<ActionResult<ExerciseModel>> GetById(Guid id)
     {
-        var exercise = await exerciseService.GetByIdAsync(id, UserId);
+        var exercise = await exerciseService.GetByIdAsync(id, CurrentUserId);
 
         if (exercise == null)
         {
@@ -37,7 +34,7 @@ public class ExercisesController(IExerciseService exerciseService) : ControllerB
     [HttpPost]
     public async Task<ActionResult<ExerciseModel>> CreateExerciseAsync([FromBody] CreateExerciseModel model)
     {
-        var ex = await exerciseService.CreateAsync(model, UserId);
+        var ex = await exerciseService.CreateAsync(model, CurrentUserId);
         
         return Ok(ex); 
     }
@@ -45,7 +42,7 @@ public class ExercisesController(IExerciseService exerciseService) : ControllerB
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateExerciseAsync(Guid id, [FromBody] UpdateExerciseModel model)
     {
-        await exerciseService.UpdateAsync(model, id, UserId);
+        await exerciseService.UpdateAsync(model, id, CurrentUserId);
         
         return Ok();
     }
@@ -53,7 +50,7 @@ public class ExercisesController(IExerciseService exerciseService) : ControllerB
     [HttpDelete]
     public async Task<IActionResult> DeleteExerciseAsync(Guid id)
     {
-        await exerciseService.DeleteAsync(id, UserId);
+        await exerciseService.DeleteAsync(id, CurrentUserId);
         
         return Ok();
     }
