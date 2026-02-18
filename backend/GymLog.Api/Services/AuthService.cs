@@ -10,7 +10,7 @@ namespace GymLog.Api.Services;
 
 public class AuthService(UserManager<ApplicationUser> userManager, IConfiguration configuration) : IAuthService
 {
-    public async Task<AuthResponse?> RegisterAsync(RegisterModel model)
+    public async Task<RegisterResult> RegisterAsync(RegisterModel model)
     {
         var user = new ApplicationUser
         {
@@ -23,22 +23,30 @@ public class AuthService(UserManager<ApplicationUser> userManager, IConfiguratio
 
         if (!result.Succeeded)
         {
-            return null;
+            var errors = result.Errors.Select(x => x.Description);
+            return new RegisterResult(false, Errors: errors);
         }
         
-        return await LoginAsync(new LoginModel(user.Email, model.Password));
+        var loginResult = await LoginAsync(new LoginModel(user.Email, model.Password));
+        return new RegisterResult(true, loginResult.Response);
     }
 
-    public async Task<AuthResponse?> LoginAsync(LoginModel model)
+    public async Task<LoginResult> LoginAsync(LoginModel model)
     {
         var user = await userManager.FindByEmailAsync(model.Email);
 
-        if (user == null || !await userManager.CheckPasswordAsync(user, model.Password))
+        if (user == null)
         {
-            return null;   
+            return new LoginResult(false, Error: "User with that email doesn't exist.");
         }
         
-        return GenerateJwtToken(user);
+
+        if (!await userManager.CheckPasswordAsync(user, model.Password))
+        {
+            return new LoginResult(false, Error: "Incorrect password.");   
+        }
+        
+        return new LoginResult(true, GenerateJwtToken(user));
     }
 
     public async Task<UserModel?> GetMeAsync(Guid userId)

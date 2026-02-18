@@ -12,12 +12,14 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> RegisterAsync(RegisterModel model)
     {
-        var res = await authService.RegisterAsync(model);
+        var registerResult = await authService.RegisterAsync(model);
 
-        if (res == null)
+        if (!registerResult.Succeeded)
         {
-            return BadRequest();
+            return BadRequest(new { errors = registerResult.Errors });
         }
+
+        var res = registerResult.Response!;
         
         var cookieOptions = new CookieOptions
         {
@@ -35,12 +37,14 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> LoginAsync(LoginModel model)
     {
-        var res = await authService.LoginAsync(model);
+        var loginResult = await authService.LoginAsync(model);
 
-        if (res == null)
+        if (loginResult.Error != null)
         {
-            return BadRequest();
+            return BadRequest(new { error = loginResult.Error });
         }
+
+        var res = loginResult.Response!;
         
         var cookieOptions = new CookieOptions
         {
@@ -88,5 +92,4 @@ public class AuthController(IAuthService authService) : ControllerBase
         
         return Ok(user);
     }
-    
 }
