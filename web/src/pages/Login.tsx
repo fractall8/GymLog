@@ -19,32 +19,35 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <form
         onSubmit={handleSubmit}
-        className="bg-slate-900 p-8 rounded-2xl border border-slate-800 w-full max-w-md"
+        className="bg-white p-8 rounded-2xl border border-slate-200 w-full max-w-md shadow-xl shadow-slate-200/50"
       >
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">
+        <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center">
           Login
         </h2>
         <input
           type="email"
           placeholder="Email"
-          className="w-full bg-slate-800 text-white p-3 rounded-lg mb-4 border border-slate-700 focus:border-indigo-500 outline-none"
+          className="w-full bg-white text-slate-900 p-3 rounded-lg mb-4 border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition"
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
           placeholder="Password"
-          className="w-full bg-slate-800 text-white p-3 rounded-lg mb-6 border border-slate-700 focus:border-indigo-500 outline-none"
+          className="w-full bg-white text-slate-900 p-3 rounded-lg mb-6 border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold transition">
+        <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold transition shadow-lg shadow-indigo-200">
           Login
         </button>
-        <p className="text-slate-400 text-sm mt-4 text-center">
-          Don't have an account?
-          <Link to="/register" className="text-indigo-400 underline">
+        <p className="text-slate-500 text-sm mt-4 text-center">
+          Don't have an account?{" "}
+          <Link
+            to="/register"
+            className="text-indigo-600 font-semibold underline"
+          >
             Create
           </Link>
         </p>

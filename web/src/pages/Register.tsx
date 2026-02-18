@@ -28,28 +28,28 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white border border-slate-200 p-8 rounded-2xl shadow-2xl shadow-slate-200/60">
         <div className="flex flex-col items-center mb-8">
-          <div className="bg-emerald-600 p-3 rounded-xl mb-4 shadow-lg shadow-emerald-900/20">
+          <div className="bg-emerald-500 p-3 rounded-xl mb-4 shadow-lg shadow-emerald-200">
             <UserPlus className="text-white" size={32} />
           </div>
-          <h2 className="text-2xl font-bold text-white">Create account</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Create account</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-slate-400 text-xs uppercase font-bold mb-2 ml-1">
+            <label className="block text-slate-500 text-xs uppercase font-bold mb-2 ml-1">
               Username
             </label>
             <div className="relative">
               <User
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 size={18}
               />
               <input
                 type="text"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-10 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
+                className="w-full bg-white border border-slate-300 rounded-xl px-10 py-3 text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                 placeholder="Username"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
@@ -59,17 +59,17 @@ export const Register = () => {
           </div>
 
           <div>
-            <label className="block text-slate-400 text-xs uppercase font-bold mb-2 ml-1">
+            <label className="block text-slate-500 text-xs uppercase font-bold mb-2 ml-1">
               Email
             </label>
             <div className="relative">
               <Mail
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 size={18}
               />
               <input
                 type="email"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-10 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
+                className="w-full bg-white border border-slate-300 rounded-xl px-10 py-3 text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                 placeholder="example@mail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -79,17 +79,17 @@ export const Register = () => {
           </div>
 
           <div>
-            <label className="block text-slate-400 text-xs uppercase font-bold mb-2 ml-1">
+            <label className="block text-slate-500 text-xs uppercase font-bold mb-2 ml-1">
               Password
             </label>
             <div className="relative">
               <Lock
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                 size={18}
               />
               <input
                 type="password"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-10 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
+                className="w-full bg-white border border-slate-300 rounded-xl px-10 py-3 text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -99,25 +99,25 @@ export const Register = () => {
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-lg">
               {error}
             </div>
           )}
 
           <button
             type="submit"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-900/20 transition duration-200 transform active:scale-[0.98]"
+            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-100 transition duration-200 transform active:scale-[0.98]"
           >
             Register
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-slate-800 text-center">
-          <p className="text-slate-400 text-sm">
-            Already have an account?
+        <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+          <p className="text-slate-500 text-sm">
+            Already have an account?{" "}
             <Link
               to="/login"
-              className="text-emerald-400 font-semibold hover:text-emerald-300 transition"
+              className="text-emerald-600 font-semibold hover:text-emerald-700 transition"
             >
               Login
             </Link>

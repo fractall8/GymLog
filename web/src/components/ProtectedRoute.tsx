@@ -7,7 +7,9 @@ export const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 
   if (loading)
     return (
-      <div className="bg-slate-950 min-h-screen text-white">Загрузка...</div>
+      <div className="flex justify-center items-center min-h-screen text-lg">
+        Loading...
+      </div>
     );
   if (!user) return <Navigate to="/login" />;
 

@@ -4,6 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
+import { Workouts } from "./pages/Workouts";
 
 function App() {
   return (
@@ -12,11 +13,12 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Home />} />
           <Route
-            path="/"
+            path="/workouts"
             element={
               <ProtectedRoute>
-                <Home />
+                <Workouts />
               </ProtectedRoute>
             }
           />
