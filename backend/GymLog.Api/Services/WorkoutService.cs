@@ -66,18 +66,19 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
     }
     
     
-    public async Task FinishWorkoutAsync(Guid userId)
+    public async Task<bool> FinishWorkoutAsync(Guid userId)
     {
         var workout = await context.Workouts
             .FirstOrDefaultAsync(w => w.UserId == userId && w.FinishedAt == null);
 
         if (workout == null)
         {
-            return;
+            return false;
         }
         
         workout.FinishedAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<IEnumerable<WorkoutModel>> GetWorkoutsAsync(Guid userId)

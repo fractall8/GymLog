@@ -8,7 +8,7 @@ public interface IWorkoutService
     
     Task<WorkoutModel?> GetActiveWorkoutAsync(Guid userId);
     
-    Task FinishWorkoutAsync(Guid userId);
+    Task<bool> FinishWorkoutAsync(Guid userId);
     
     Task<IEnumerable<WorkoutModel>> GetWorkoutsAsync(Guid userId);
 }

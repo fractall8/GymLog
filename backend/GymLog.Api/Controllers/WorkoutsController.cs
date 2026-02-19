@@ -47,8 +47,13 @@ public class WorkoutsController(IWorkoutService workoutService) : BaseController
     [HttpPatch("finish")]
     public async Task<IActionResult> FinishWorkout()
     {
-        await workoutService.FinishWorkoutAsync(CurrentUserId);
+        var succeeded = await workoutService.FinishWorkoutAsync(CurrentUserId);
 
+        if (!succeeded)
+        {
+            return NotFound(new {message = "Workout not found"});
+        }
+        
         return NoContent();
     }  
 }
