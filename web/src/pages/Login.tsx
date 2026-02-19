@@ -1,10 +1,20 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
+import type { AxiosError } from "axios";
+import { AlertCircle } from "lucide-react";
+
+interface LoginApiErrorResponse {
+  error?: string;
+  message?: string;
+}
 
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const [error, setError] = useState<string>();
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -12,9 +22,19 @@ export const Login = () => {
     e.preventDefault();
     try {
       await login(email, password);
-      navigate("/");
+      navigate("/workouts");
     } catch (ex) {
-      console.log("Failed to login:", ex);
+      const axiosError = ex as AxiosError<LoginApiErrorResponse>;
+
+      const serverError = axiosError.response?.data?.error;
+      const genericMessage =
+        axiosError.response?.data?.message || "Failed to log in.";
+
+      if (serverError) {
+        setError(serverError);
+      } else {
+        setError(genericMessage);
+      }
     }
   };
 
@@ -39,10 +59,21 @@ export const Login = () => {
           className="w-full bg-white text-slate-900 p-3 rounded-lg mb-6 border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold transition shadow-lg shadow-indigo-200">
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 p-4 rounded-xl mb-4">
+            <div className="flex items-start gap-2 text-red-600 text-sm">
+              <AlertCircle size={16} className="mt-0.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          </div>
+        )}
+
+        <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold transition shadow-lg shadow-indigo-200 mb-4">
           Login
         </button>
-        <p className="text-slate-500 text-sm mt-4 text-center">
+
+        <p className="text-slate-500 text-sm text-center">
           Don't have an account?{" "}
           <Link
             to="/register"

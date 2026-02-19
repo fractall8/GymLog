@@ -1,29 +1,44 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { UserPlus, Mail, Lock, User } from "lucide-react";
+import { UserPlus, Mail, Lock, User, AlertCircle } from "lucide-react";
+import { AxiosError } from "axios";
+
+// move types into separate file
+interface RegisterApiErrorResponse {
+  errors?: string[];
+  message?: string;
+}
 
 export const Register = () => {
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+
+  const [errors, setErrors] = useState<string[]>([]);
 
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setErrors([]);
 
     try {
       await register(userName, email, password);
-      navigate("/");
+      navigate("/workouts");
     } catch (err) {
-      const errorMessage =
-        (err as any).response?.data?.message ||
-        "Registration failed. Try different email.";
-      setError(errorMessage);
+      const axiosError = err as AxiosError<RegisterApiErrorResponse>;
+
+      const serverErrors = axiosError.response?.data?.errors;
+      const genericMessage =
+        axiosError.response?.data?.message || "Registration failed.";
+
+      if (serverErrors && Array.isArray(serverErrors)) {
+        setErrors(serverErrors);
+      } else {
+        setErrors([genericMessage]);
+      }
     }
   };
 
@@ -98,9 +113,17 @@ export const Register = () => {
             </div>
           </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-lg">
-              {error}
+          {errors.length > 0 && (
+            <div className="bg-red-50 border border-red-200 p-4 rounded-xl space-y-2">
+              {errors.map((msg, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-2 text-red-600 text-sm"
+                >
+                  <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                  <span>{msg}</span>
+                </div>
+              ))}
             </div>
           )}
 

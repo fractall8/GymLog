@@ -5,6 +5,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Workouts } from "./pages/Workouts";
+import { Layout } from "./layouts/Layout";
+import { History } from "./pages/History";
 
 function App() {
   return (
@@ -18,7 +20,19 @@ function App() {
             path="/workouts"
             element={
               <ProtectedRoute>
-                <Workouts />
+                <Layout>
+                  <Workouts />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <History />
+                </Layout>
               </ProtectedRoute>
             }
           />
