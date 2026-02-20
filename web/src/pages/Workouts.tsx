@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
-import { Plus, CheckCircle2, ListFilter } from "lucide-react";
+import { Plus, CheckCircle2, ListFilter, Check, Pencil } from "lucide-react";
 
 interface Exercise {
   id: string;
@@ -15,11 +15,14 @@ interface WorkoutSet {
 interface Workout {
   id: string;
   name: string;
+  description: string;
   sets: WorkoutSet[];
 }
 
 export const Workouts = () => {
   const [activeWorkout, setActiveWorkout] = useState<Workout | null>(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [newSet, setNewSet] = useState({
@@ -46,6 +49,44 @@ export const Workouts = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (activeWorkout) setEditedName(activeWorkout.name);
+  }, [activeWorkout]);
+
+  const handleUpdateName = async () => {
+    if (
+      !activeWorkout ||
+      editedName.trim() === "" ||
+      editedName === activeWorkout.name
+    ) {
+      setIsEditingName(false);
+      setEditedName(activeWorkout?.name || "");
+      return;
+    }
+
+    try {
+      await api.put(`/workouts/${activeWorkout.id}`, {
+        name: editedName,
+        description: activeWorkout.description,
+      });
+
+      setActiveWorkout({ ...activeWorkout, name: editedName });
+      setIsEditingName(false);
+    } catch {
+      console.error("Failed to update name");
+      setEditedName(activeWorkout.name);
+      setIsEditingName(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleUpdateName();
+    if (e.key === "Escape") {
+      setIsEditingName(false);
+      setEditedName(activeWorkout?.name || "");
+    }
+  };
+
   const startWorkout = async () => {
     const res = await api.post("/workouts", {
       name: `Session ${new Date().toLocaleDateString()}`,
@@ -53,7 +94,7 @@ export const Workouts = () => {
     setActiveWorkout(res.data);
   };
 
-  const addSet = async (e: React.FormEvent) => {
+  const addSet = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!activeWorkout) return;
     const res = await api.post(`/workouts/${activeWorkout.id}/sets`, {
@@ -103,12 +144,39 @@ export const Workouts = () => {
       ) : (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-slate-900">
-              {activeWorkout.name}
-            </h2>
+            {isEditingName ? (
+              <div className="flex-1 mr-4 flex items-center gap-2">
+                <input
+                  autoFocus
+                  className="text-2xl font-bold text-slate-900 border-b-2 border-indigo-600 outline-none w-full pb-1"
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  onBlur={handleUpdateName}
+                  onKeyDown={handleKeyDown}
+                />
+                <Check
+                  size={20}
+                  className="text-indigo-600 shrink-0 hover:cursor-pointer"
+                />
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-slate-900">
+                  {activeWorkout.name}
+                </h2>
+                <button
+                  onClick={() => setIsEditingName(true)}
+                  className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition focus:opacity-100"
+                  title="Edit name"
+                >
+                  <Pencil size={18} />
+                </button>
+              </div>
+            )}
+
             <button
               onClick={finishWorkout}
-              className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md shadow-emerald-100"
+              className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md shadow-emerald-100 shrink-0"
             >
               <CheckCircle2 size={18} /> Finish
             </button>
