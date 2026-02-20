@@ -14,7 +14,7 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
         {
             return null;
         }
-        
+
         var workout = new Workout
         {
             Id = Guid.CreateVersion7(),
@@ -24,7 +24,7 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
             StartedAt = DateTime.UtcNow,
             FinishedAt = null
         };
-        
+
         context.Workouts.Add(workout);
         await context.SaveChangesAsync();
         return new WorkoutModel
@@ -36,7 +36,7 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
             FinishedAt = workout.FinishedAt,
         };
     }
-    
+
     public async Task<WorkoutModel?> GetActiveWorkoutAsync(Guid userId)
     {
         var workout = await context.Workouts
@@ -64,8 +64,24 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
 
         return workout;
     }
-    
-    
+
+    public async Task<bool> UpdateWorkoutAsync(Guid userId, Guid workoutId, UpdateWorkoutModel model)
+    {
+        var workout = await context.Workouts
+            .FirstOrDefaultAsync(w => w.Id == workoutId && w.UserId == userId);
+
+        if (workout == null)
+        {
+            return false;
+        }
+        
+        workout.Name = model.Name;
+        workout.Description = model.Description;
+        
+        await context.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<bool> FinishWorkoutAsync(Guid userId)
     {
         var workout = await context.Workouts
@@ -75,7 +91,7 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
         {
             return false;
         }
-        
+
         workout.FinishedAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
         return true;
@@ -93,6 +109,7 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
                 Id = w.Id,
                 Name = w.Name,
                 StartedAt = w.StartedAt,
+                FinishedAt = w.FinishedAt,
                 Description = w.Description,
                 Sets = w.WorkoutSets.Select(s => new WorkoutSetModel
                 {
@@ -108,5 +125,5 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
             .ToListAsync();
 
         return workouts;
-    } 
+    }
 }

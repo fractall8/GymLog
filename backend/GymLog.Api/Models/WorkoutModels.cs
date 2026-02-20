@@ -19,3 +19,10 @@ public class CreateWorkoutModel
 
     public List<WorkoutSetModel> Sets { get; set; } = new();
 }
+
+public class UpdateWorkoutModel
+{
+    public string Name { get; set; } = string.Empty;
+
+    public string? Description { get; set; }
+}

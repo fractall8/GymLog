@@ -56,4 +56,17 @@ public class WorkoutsController(IWorkoutService workoutService) : BaseController
         
         return NoContent();
     }  
+    
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateWorkout(Guid id, [FromBody] UpdateWorkoutModel model)
+    {
+        var result = await workoutService.UpdateWorkoutAsync(CurrentUserId, id, model);
+
+        if (!result)
+        {
+            return NotFound(new { message = "The workout was not found or you do not have permission to edit it." });
+        }
+
+        return NoContent();
+    }
 }
