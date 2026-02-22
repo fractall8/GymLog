@@ -21,6 +21,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   const navLinks = [
     { name: "Workouts", path: "/workouts", icon: Activity },
     { name: "History", path: "/history", icon: HistoryIcon },
+    { name: "Exercises", path: "/exercises", icon: Dumbbell },
   ];
 
   return (

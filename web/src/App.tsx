@@ -7,6 +7,7 @@ import { Register } from "./pages/Register";
 import { Workouts } from "./pages/Workouts";
 import { Layout } from "./layouts/Layout";
 import { History } from "./pages/History";
+import { Exercises } from "./pages/Exercises";
 
 function App() {
   return (
@@ -32,6 +33,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <History />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exercises"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Exercises />
                 </Layout>
               </ProtectedRoute>
             }
