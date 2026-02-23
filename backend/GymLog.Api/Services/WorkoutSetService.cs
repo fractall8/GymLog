@@ -51,7 +51,24 @@ public class WorkoutSetService(GymLogDbContext context): IWorkoutSetService
         };
     }
 
-    public async Task DeleteSetAsync(Guid setId, Guid userId)
+    public async Task<bool> UpdateSetAsync(Guid userId, Guid setId, UpdateSetModel model)
+    {
+        var set = await context.Sets
+            .Include(s => s.Workout)
+            .FirstOrDefaultAsync(s => s.Id == setId && s.Workout.UserId == userId);
+
+        if (set == null)
+        {
+            return false;
+        }
+        
+        set.Weight = model.Weight;
+        set.Reps = model.Reps;
+        await context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task DeleteSetAsync(Guid userId, Guid setId)
     {
         var set = await context.Sets
             .FirstOrDefaultAsync(s => s.Id == setId && s.Workout.UserId == userId);

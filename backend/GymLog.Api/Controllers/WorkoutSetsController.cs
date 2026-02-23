@@ -22,6 +22,19 @@ public class WorkoutSetsController(IWorkoutSetService setService) : BaseControll
         
         return Ok(result);
     }
+    
+    [HttpPut("{setId}")]
+    public async Task<IActionResult> UpdateSet(Guid setId, [FromBody] UpdateSetModel model)
+    {
+        var result = await setService.UpdateSetAsync(CurrentUserId, setId, model);
+
+        if (!result)
+        {
+            return NotFound(new { message = "Set not found" });
+        }
+
+        return NoContent();
+    }
 
     [HttpDelete("{setId}")]
     public async Task<IActionResult> DeleteSet(Guid setId)

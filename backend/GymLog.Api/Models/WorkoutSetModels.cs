@@ -1,4 +1,6 @@
-﻿namespace GymLog.Api.Models;
+﻿using GymLog.Api.Entities;
+
+namespace GymLog.Api.Models;
 
 public class WorkoutSetModel
 {
@@ -8,6 +10,8 @@ public class WorkoutSetModel
     public double Weight { get; set; }
     public int Reps { get; set; }
     public DateTime CreatedAt { get; set; }
+    
+    public WorkoutSetType Type { get; set; }
 }
 
 public class CreateSetModel
@@ -15,6 +19,8 @@ public class CreateSetModel
     public Guid ExerciseId { get; set; }
     public double Weight { get; set; }
     public int Reps { get; set; }
+    
+    public WorkoutSetType Type { get; set; }
 }
 
 public class UpdateSetModel

@@ -97,6 +97,21 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
         return true;
     }
 
+    public async Task<bool> CancelWorkoutAsync(Guid workoutId, Guid userId)
+    {
+        var workout = await context.Workouts
+            .FirstOrDefaultAsync(w => w.Id == workoutId && w.UserId == userId);
+
+        if (workout == null)
+        {
+            return false;
+        }
+        
+        context.Workouts.Remove(workout);
+        await context.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<IEnumerable<WorkoutModel>> GetWorkoutsAsync(Guid userId)
     {
         var workouts = await context.Workouts

@@ -69,4 +69,17 @@ public class WorkoutsController(IWorkoutService workoutService) : BaseController
 
         return NoContent();
     }
+    
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> CancelWorkout(Guid id)
+    {
+        var succeeded = await workoutService.CancelWorkoutAsync(id, CurrentUserId);
+
+        if (!succeeded)
+        {
+            return NotFound(new {message = $"Workout with id: {id} not found"});
+        }
+        
+        return NoContent();
+    }
 }
