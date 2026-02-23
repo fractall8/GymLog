@@ -24,10 +24,10 @@ public class ExerciseService(GymLogDbContext context) : IExerciseService
         return exercise;
     }
 
-    public async Task<ExerciseModel?> GetByIdAsync(Guid id, Guid? userId)
+    public async Task<ExerciseModel?> GetByIdAsync(Guid? userId, Guid exerciseId)
     {
         var exercise = await context.Exercises
-            .FindAsync(id);
+            .FindAsync(exerciseId);
 
         if (exercise == null || (exercise.UserId != null && exercise.UserId == userId))
         {
@@ -44,7 +44,7 @@ public class ExerciseService(GymLogDbContext context) : IExerciseService
         };
     }
     
-    public async Task<ExerciseModel> CreateAsync(CreateExerciseModel model, Guid userId)
+    public async Task<ExerciseModel> CreateAsync(Guid userId, CreateExerciseModel model)
     {
         var exercise = new Exercise
         {
@@ -68,10 +68,10 @@ public class ExerciseService(GymLogDbContext context) : IExerciseService
         };
     }
     
-    public async Task UpdateAsync(UpdateExerciseModel model, Guid id, Guid userId)
+    public async Task UpdateAsync(Guid userId, Guid exerciseId, UpdateExerciseModel model)
     {
         var exercise = await context.Exercises
-            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+            .FirstOrDefaultAsync(e => e.Id == exerciseId && e.UserId == userId);
 
         if (exercise == null)
         {
@@ -85,10 +85,10 @@ public class ExerciseService(GymLogDbContext context) : IExerciseService
         await context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(Guid id, Guid userId)
+    public async Task DeleteAsync(Guid userId, Guid exerciseId)
     {
         var exercise = await context.Exercises
-            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+            .FirstOrDefaultAsync(e => e.Id == exerciseId && e.UserId == userId);
 
         if (exercise == null)
         {

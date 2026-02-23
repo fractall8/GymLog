@@ -21,7 +21,7 @@ public class ExercisesController(IExerciseService exerciseService) : BaseControl
     [HttpGet("{id}")]
     public async Task<ActionResult<ExerciseModel>> GetById(Guid id)
     {
-        var exercise = await exerciseService.GetByIdAsync(id, CurrentUserId);
+        var exercise = await exerciseService.GetByIdAsync(CurrentUserId, id);
 
         if (exercise == null)
         {
@@ -34,7 +34,7 @@ public class ExercisesController(IExerciseService exerciseService) : BaseControl
     [HttpPost]
     public async Task<ActionResult<ExerciseModel>> CreateExerciseAsync([FromBody] CreateExerciseModel model)
     {
-        var ex = await exerciseService.CreateAsync(model, CurrentUserId);
+        var ex = await exerciseService.CreateAsync(CurrentUserId, model);
         
         return Ok(ex); 
     }
@@ -42,7 +42,7 @@ public class ExercisesController(IExerciseService exerciseService) : BaseControl
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateExerciseAsync(Guid id, [FromBody] UpdateExerciseModel model)
     {
-        await exerciseService.UpdateAsync(model, id, CurrentUserId);
+        await exerciseService.UpdateAsync(CurrentUserId, id, model);
         
         return Ok();
     }
@@ -50,7 +50,7 @@ public class ExercisesController(IExerciseService exerciseService) : BaseControl
     [HttpDelete]
     public async Task<IActionResult> DeleteExerciseAsync(Guid id)
     {
-        await exerciseService.DeleteAsync(id, CurrentUserId);
+        await exerciseService.DeleteAsync(CurrentUserId, id);
         
         return Ok();
     }

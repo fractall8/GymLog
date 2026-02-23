@@ -1,270 +1,335 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
-import { Plus, CheckCircle2, ListFilter, Check, Pencil } from "lucide-react";
+import { Plus, CheckCircle2, Trash2, Flame, Thermometer, Play, XCircle, Pencil, Check } from "lucide-react";
 
-interface Exercise {
-  id: string;
-  name: string;
-}
+type SetType = 'Warmup' | 'Normal' | 'Failure';
+
 interface WorkoutSet {
   id: string;
+  exerciseId: string;
   exerciseName: string;
   weight: number;
   reps: number;
+  type: SetType;
 }
+
 interface Workout {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   sets: WorkoutSet[];
 }
 
 export const Workouts = () => {
   const [activeWorkout, setActiveWorkout] = useState<Workout | null>(null);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [editedName, setEditedName] = useState("");
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [exercises, setExercises] = useState<any[]>([]);
+  const [showExerciseSelector, setShowExerciseSelector] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [newSet, setNewSet] = useState({
-    exerciseId: "",
-    weight: "",
-    reps: "",
-  });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [editedDescription, setEditedDescription] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [workoutRes, exRes] = await Promise.all([
-          api.get("/workouts/active"),
-          api.get("/exercises"),
-        ]);
-        setActiveWorkout(workoutRes.data);
-        setExercises(exRes.data);
-      } catch (e) {
-        console.log("No active workout: ", e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    loadData();
   }, []);
 
-  useEffect(() => {
-    if (activeWorkout) setEditedName(activeWorkout.name);
-  }, [activeWorkout]);
-
-  const handleUpdateName = async () => {
-    if (
-      !activeWorkout ||
-      editedName.trim() === "" ||
-      editedName === activeWorkout.name
-    ) {
-      setIsEditingName(false);
-      setEditedName(activeWorkout?.name || "");
-      return;
-    }
-
+  const loadData = async () => {
     try {
-      await api.put(`/workouts/${activeWorkout.id}`, {
-        name: editedName,
-        description: activeWorkout.description,
-      });
-
-      setActiveWorkout({ ...activeWorkout, name: editedName });
-      setIsEditingName(false);
-    } catch {
-      console.error("Failed to update name");
-      setEditedName(activeWorkout.name);
-      setIsEditingName(false);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleUpdateName();
-    if (e.key === "Escape") {
-      setIsEditingName(false);
-      setEditedName(activeWorkout?.name || "");
+      const [w, e] = await Promise.all([
+        api.get("/workouts/active"),
+        api.get("/exercises")
+      ]);
+      setActiveWorkout(w.data);
+      setExercises(e.data);
+      if (w.data) {
+        setEditedName(w.data.name);
+        setEditedDescription(w.data.description || "");
+      }
+    } catch (e) {
+      console.log("No active workout found");
+    } finally {
+      setLoading(false);
     }
   };
 
   const startWorkout = async () => {
-    const res = await api.post("/workouts", {
-      name: `Session ${new Date().toLocaleDateString()}`,
-    });
-    setActiveWorkout(res.data);
+    try {
+      const res = await api.post("/workouts", { 
+        name: `Session ${new Date().toLocaleDateString()}` 
+      });
+      setActiveWorkout(res.data);
+      setEditedName(res.data.name);
+      setEditedDescription("");
+    } catch (e) {
+      alert("Failed to start workout");
+    }
   };
 
-  const addSet = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!activeWorkout) return;
-    const res = await api.post(`/workouts/${activeWorkout.id}/sets`, {
-      ...newSet,
-      weight: parseFloat(newSet.weight),
-      reps: parseInt(newSet.reps),
-    });
-    setActiveWorkout({
-      ...activeWorkout,
-      sets: [...activeWorkout.sets, res.data],
-    });
-    setNewSet({ ...newSet, weight: "", reps: "" });
+  const cancelWorkout = async () => {
+    if (!activeWorkout || !window.confirm("Cancel workout? All current progress will be lost.")) return;
+    try {
+      await api.delete(`/workouts/${activeWorkout.id}`);
+      setActiveWorkout(null);
+    } catch (e) {
+      alert("Failed to cancel workout");
+    }
   };
 
   const finishWorkout = async () => {
-    await api.patch("/workouts/finish");
-    setActiveWorkout(null);
+    try {
+      await api.patch("/workouts/finish");
+      setActiveWorkout(null);
+    } catch (e) {
+      alert("Failed to finish workout");
+    }
   };
 
-  if (loading)
-    return (
-      <div className="flex justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+  const addSet = async (exerciseId: string) => {
+    if (!activeWorkout) return;
+    try {
+      const res = await api.post(`/workouts/${activeWorkout.id}/sets`, {
+        exerciseId,
+        weight: 0,
+        reps: 0,
+        type: 'Normal'
+      });
+      setActiveWorkout({
+        ...activeWorkout,
+        sets: [...activeWorkout.sets, res.data]
+      });
+    } catch (e) {
+      alert("Failed to add set");
+    }
+  };
+
+  const deleteSet = async (setId: string) => {
+    if (!activeWorkout) return;
+    try {
+      await api.delete(`/workouts/${activeWorkout.id}/sets/${setId}`);
+      setActiveWorkout({
+        ...activeWorkout,
+        sets: activeWorkout.sets.filter(s => s.id !== setId)
+      });
+    } catch (e) {
+      alert("Failed to delete set");
+    }
+  };
+
+  const updateSetData = async (setId: string, weight: number, reps: number, type: SetType) => {
+    if (!activeWorkout) return;
+    try {
+      await api.put(`/workouts/${activeWorkout.id}/sets/${setId}`, { weight, reps, type });
+      setActiveWorkout({
+        ...activeWorkout,
+        sets: activeWorkout.sets.map(s => 
+          s.id === setId ? { ...s, weight, reps, type } : s
+        )
+      });
+    } catch (e) {
+      console.error("Failed to update set");
+    }
+  };
+
+  const toggleSetType = (set: WorkoutSet) => {
+    const types: SetType[] = ['Warmup', 'Normal', 'Failure'];
+    const currentIndex = types.indexOf(set.type);
+    const nextType = types[(currentIndex + 1) % types.length];
+    updateSetData(set.id, set.weight, set.reps, nextType);
+  };
+
+  const handleUpdateWorkoutInfo = async () => {
+    if (!activeWorkout) return;
+    try {
+      await api.put(`/workouts/${activeWorkout.id}`, {
+        name: editedName || activeWorkout.name,
+        description: editedDescription
+      });
+      setActiveWorkout({ ...activeWorkout, name: editedName, description: editedDescription });
+      setIsEditing(false);
+    } catch (e) {
+      alert("Failed to update workout info");
+    }
+  };
+
+  const groupedSets = activeWorkout?.sets.reduce((acc: Record<string, {name: string, sets: WorkoutSet[]}>, set: WorkoutSet) => {
+    if (!acc[set.exerciseId]) acc[set.exerciseId] = { name: set.exerciseName, sets: [] };
+    acc[set.exerciseId].sets.push(set);
+    return acc;
+  }, {});
+
+  if (loading) return (
+    <div className="flex justify-center py-20">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+    </div>
+  );
+
+  if (!activeWorkout) return (
+    <div className="max-w-xl mx-auto text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm">
+      <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <Play size={32} />
       </div>
-    );
+      <h2 className="text-2xl font-bold text-slate-900 mb-2">Ready for a session?</h2>
+      <p className="text-slate-500 mb-8">Start tracking your workout to see your progress.</p>
+      <button 
+        onClick={startWorkout}
+        className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100"
+      >
+        Start New Workout
+      </button>
+    </div>
+  );
 
   return (
-    <div className="max-w-3xl mx-auto">
-      {!activeWorkout ? (
-        <div className="bg-white p-12 rounded-3xl border border-slate-200 shadow-sm text-center">
-          <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Plus size={32} />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            Ready for your next session?
-          </h2>
-          <p className="text-slate-500 mb-8">
-            Start a new workout to track your sets and reps.
-          </p>
-          <button
-            onClick={startWorkout}
-            className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100"
-          >
-            Start New Workout
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            {isEditingName ? (
-              <div className="flex-1 mr-4 flex items-center gap-2">
+    <div className="max-w-3xl mx-auto space-y-6">
+      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex-1">
+            {isEditing ? (
+              <div className="space-y-3">
                 <input
                   autoFocus
-                  className="text-2xl font-bold text-slate-900 border-b-2 border-indigo-600 outline-none w-full pb-1"
+                  className="text-2xl font-bold text-slate-900 w-full outline-none border-b-2 border-indigo-600 pb-1"
                   value={editedName}
                   onChange={(e) => setEditedName(e.target.value)}
-                  onBlur={handleUpdateName}
-                  onKeyDown={handleKeyDown}
+                  placeholder="Workout Name"
                 />
-                <Check
-                  size={20}
-                  className="text-indigo-600 shrink-0 hover:cursor-pointer"
+                <textarea
+                  className="text-slate-500 w-full outline-none border-b border-slate-200 py-1 resize-none h-20 text-sm"
+                  value={editedDescription}
+                  onChange={(e) => setEditedDescription(e.target.value)}
+                  placeholder="Add a description..."
                 />
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-slate-900">
-                  {activeWorkout.name}
-                </h2>
-                <button
-                  onClick={() => setIsEditingName(true)}
-                  className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition focus:opacity-100"
-                  title="Edit name"
+                <button 
+                  onClick={handleUpdateWorkoutInfo}
+                  className="flex items-center gap-1 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-indigo-700 transition"
                 >
-                  <Pencil size={18} />
+                  <Check size={16} /> Save Changes
                 </button>
               </div>
+            ) : (
+              <div className="group">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-2xl font-bold text-slate-900">{activeWorkout.name}</h2>
+                  <button 
+                    onClick={() => setIsEditing(true)}
+                    className="p-1 text-slate-400 hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                </div>
+                {activeWorkout.description && <p className="text-slate-500 mt-1 text-sm">{activeWorkout.description}</p>}
+              </div>
             )}
-
-            <button
+          </div>
+          <div className="flex gap-2">
+            <button onClick={cancelWorkout} className="p-2 text-slate-400 hover:text-red-600 transition" title="Cancel">
+              <XCircle size={24} />
+            </button>
+            <button 
               onClick={finishWorkout}
-              className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md shadow-emerald-100 shrink-0"
+              className="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md shadow-emerald-100 flex items-center gap-2"
             >
               <CheckCircle2 size={18} /> Finish
             </button>
           </div>
+        </div>
+      </div>
 
-          <form
-            onSubmit={addSet}
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-4 gap-4 items-end"
-          >
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">
-                Exercise
-              </label>
-              <select
-                className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                value={newSet.exerciseId}
-                onChange={(e) =>
-                  setNewSet({ ...newSet, exerciseId: e.target.value })
-                }
-                required
-              >
-                <option value="">Select exercise...</option>
-                {exercises.map((ex) => (
-                  <option key={ex.id} value={ex.id}>
-                    {ex.name}
-                  </option>
-                ))}
-              </select>
+      <div className="space-y-4">
+        {Object.entries(groupedSets || {}).map(([exId, data]) => (
+          <div key={exId} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+            <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700">
+              {data.name}
             </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">
-                Kg
-              </label>
-              <input
-                type="number"
-                step="0.5"
-                className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                value={newSet.weight}
-                onChange={(e) =>
-                  setNewSet({ ...newSet, weight: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">
-                Reps
-              </label>
-              <input
-                type="number"
-                className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                value={newSet.reps}
-                onChange={(e) => setNewSet({ ...newSet, reps: e.target.value })}
-                required
-              />
-            </div>
-            <button className="sm:col-span-4 bg-slate-900 text-white p-3 rounded-xl font-bold hover:bg-slate-800 transition">
-              Add Set
-            </button>
-          </form>
-
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2 text-slate-600 font-bold text-sm">
-              <ListFilter size={16} /> Current Sets
-            </div>
-            <div className="divide-y divide-slate-100">
-              {activeWorkout.sets.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 italic">
-                  No sets added yet
-                </div>
-              ) : (
-                activeWorkout.sets.map((set) => (
-                  <div
-                    key={set.id}
-                    className="p-4 flex justify-between items-center hover:bg-slate-50 transition"
+            <div className="p-4 space-y-2">
+              {data.sets.map((set, index) => (
+                <div key={set.id} className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl">
+                  <span className="w-8 text-xs font-black text-slate-400 text-center">#{index + 1}</span>
+                  
+                  <button 
+                    onClick={() => toggleSetType(set)}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white transition bg-transparent"
+                    title="Toggle Set Type"
                   >
-                    <div>
-                      <div className="font-bold text-slate-900">
-                        {set.exerciseName}
-                      </div>
-                      <div className="text-sm text-slate-500">
-                        {set.weight} kg x {set.reps} reps
-                      </div>
+                    {set.type === 'Warmup' && <Thermometer size={18} className="text-blue-500" />}
+                    {set.type === 'Normal' && <Play size={18} className="text-slate-400" />}
+                    {set.type === 'Failure' && <Flame size={18} className="text-orange-500" />}
+                  </button>
+
+                  <div className="flex-1 flex gap-2">
+                    <div className="flex-1">
+                      <input 
+                        type="number" 
+                        step="0.5"
+                        placeholder="kg"
+                        className="w-full bg-white border border-slate-200 rounded-lg p-2 text-center font-bold outline-none focus:border-indigo-500 transition"
+                        defaultValue={set.weight}
+                        onBlur={(e) => updateSetData(set.id, parseFloat(e.target.value) || 0, set.reps, set.type)}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <input 
+                        type="number" 
+                        placeholder="reps"
+                        className="w-full bg-white border border-slate-200 rounded-lg p-2 text-center font-bold outline-none focus:border-indigo-500 transition"
+                        defaultValue={set.reps}
+                        onBlur={(e) => updateSetData(set.id, set.weight, parseInt(e.target.value) || 0, set.type)}
+                      />
                     </div>
                   </div>
-                ))
-              )}
+                  
+                  <button 
+                    onClick={() => deleteSet(set.id)} 
+                    className="p-2 text-slate-300 hover:text-red-500 transition"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+              
+              <button 
+                onClick={() => addSet(exId)} 
+                className="w-full mt-2 py-3 rounded-xl border-2 border-dashed border-slate-100 text-slate-400 text-sm font-bold hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition flex items-center justify-center gap-2"
+              >
+                <Plus size={16} /> Add Set
+              </button>
             </div>
+          </div>
+        ))}
+      </div>
+
+      <button 
+        onClick={() => setShowExerciseSelector(true)}
+        className="w-full py-6 rounded-3xl border-2 border-dashed border-slate-200 text-slate-400 font-bold hover:border-indigo-300 hover:text-indigo-600 transition flex items-center justify-center gap-2"
+      >
+        <Plus size={20} /> Add Exercise
+      </button>
+
+      {showExerciseSelector && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
+          <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-slate-900 mb-4">Select Exercise</h3>
+            <div className="max-h-80 overflow-y-auto space-y-1 mb-6 pr-2">
+              {exercises.map(ex => (
+                <button 
+                  key={ex.id}
+                  onClick={() => {
+                    addSet(ex.id);
+                    setShowExerciseSelector(false);
+                  }}
+                  className="w-full text-left p-3 rounded-xl hover:bg-indigo-50 font-bold text-slate-700 transition"
+                >
+                  {ex.name}
+                </button>
+              ))}
+            </div>
+            <button 
+              onClick={() => setShowExerciseSelector(false)} 
+              className="w-full py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

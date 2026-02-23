@@ -6,7 +6,7 @@ namespace GymLog.Api.Services;
 
 public class WorkoutService(GymLogDbContext context) : IWorkoutService
 {
-    public async Task<WorkoutModel?> StartWorkoutAsync(CreateWorkoutModel model, Guid userId)
+    public async Task<WorkoutModel?> StartWorkoutAsync(Guid userId, CreateWorkoutModel model)
     {
         var hasActive = await context.Workouts.AnyAsync(w => w.UserId == userId && w.FinishedAt == null);
 
@@ -57,6 +57,7 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
                     ExerciseName = s.Exercise.Name,
                     Weight = s.Weight,
                     Reps = s.Reps,
+                    Type = s.Type,
                     CreatedAt = s.CreatedAt
                 }).OrderBy(s => s.CreatedAt).ToList()
             })
@@ -97,7 +98,7 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
         return true;
     }
 
-    public async Task<bool> CancelWorkoutAsync(Guid workoutId, Guid userId)
+    public async Task<bool> CancelWorkoutAsync(Guid userId, Guid workoutId)
     {
         var workout = await context.Workouts
             .FirstOrDefaultAsync(w => w.Id == workoutId && w.UserId == userId);
@@ -133,6 +134,7 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
                     ExerciseName = s.Exercise.Name,
                     Weight = s.Weight,
                     Reps = s.Reps,
+                    Type = s.Type,
                     CreatedAt = s.CreatedAt
                 }).OrderBy(s => s.CreatedAt).ToList()
             })

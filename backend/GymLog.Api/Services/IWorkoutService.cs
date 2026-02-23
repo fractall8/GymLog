@@ -4,7 +4,7 @@ namespace GymLog.Api.Services;
 
 public interface IWorkoutService
 {
-    Task<WorkoutModel?> StartWorkoutAsync(CreateWorkoutModel model, Guid userId);
+    Task<WorkoutModel?> StartWorkoutAsync(Guid userId, CreateWorkoutModel model);
     
     Task<WorkoutModel?> GetActiveWorkoutAsync(Guid userId);
     
@@ -12,7 +12,7 @@ public interface IWorkoutService
     
     Task<bool> FinishWorkoutAsync(Guid userId);
     
-    Task<bool> CancelWorkoutAsync(Guid workoutId, Guid userId);
+    Task<bool> CancelWorkoutAsync(Guid userId, Guid workoutId);
     
     Task<IEnumerable<WorkoutModel>> GetWorkoutsAsync(Guid userId);
 }

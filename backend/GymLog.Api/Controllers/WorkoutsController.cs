@@ -34,7 +34,7 @@ public class WorkoutsController(IWorkoutService workoutService) : BaseController
     [HttpPost]
     public async Task<ActionResult<WorkoutModel>> CreateWorkout([FromBody] CreateWorkoutModel model)
     {
-        var workout = await workoutService.StartWorkoutAsync(model, CurrentUserId);
+        var workout = await workoutService.StartWorkoutAsync(CurrentUserId, model);
 
         if (workout == null)
         {
@@ -73,7 +73,7 @@ public class WorkoutsController(IWorkoutService workoutService) : BaseController
     [HttpDelete("{id}")]
     public async Task<IActionResult> CancelWorkout(Guid id)
     {
-        var succeeded = await workoutService.CancelWorkoutAsync(id, CurrentUserId);
+        var succeeded = await workoutService.CancelWorkoutAsync(CurrentUserId, id);
 
         if (!succeeded)
         {

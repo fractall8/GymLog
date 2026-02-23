@@ -39,7 +39,13 @@ public class WorkoutSetsController(IWorkoutSetService setService) : BaseControll
     [HttpDelete("{setId}")]
     public async Task<IActionResult> DeleteSet(Guid setId)
     {
-        await setService.DeleteSetAsync(setId, CurrentUserId);
+        var succeeded = await setService.DeleteSetAsync(CurrentUserId, setId);
+
+        if (!succeeded)
+        {
+            return NotFound(new { message = "Set not found" });
+        }
+        
         return NoContent();
     }
 }

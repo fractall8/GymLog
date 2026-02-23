@@ -29,6 +29,7 @@ public class WorkoutSetService(GymLogDbContext context): IWorkoutSetService
             ExerciseId = model.ExerciseId,
             Weight = model.Weight,
             Reps = model.Reps,
+            Type = model.Type,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -47,6 +48,7 @@ public class WorkoutSetService(GymLogDbContext context): IWorkoutSetService
             ExerciseName = exerciseName,
             Weight = set.Weight,
             Reps = set.Reps,
+            Type = set.Type,
             CreatedAt = set.CreatedAt
         };
     }
@@ -64,19 +66,24 @@ public class WorkoutSetService(GymLogDbContext context): IWorkoutSetService
         
         set.Weight = model.Weight;
         set.Reps = model.Reps;
+        set.Type = model.Type;
         await context.SaveChangesAsync();
         return true;
     }
 
-    public async Task DeleteSetAsync(Guid userId, Guid setId)
+    public async Task<bool> DeleteSetAsync(Guid userId, Guid setId)
     {
         var set = await context.Sets
+            .Include(s => s.Workout)
             .FirstOrDefaultAsync(s => s.Id == setId && s.Workout.UserId == userId);
 
-        if (set != null)
+        if (set == null)
         {
-            context.Sets.Remove(set);
-            await context.SaveChangesAsync();
-        }
+            return false;
+        } 
+        
+        context.Sets.Remove(set);
+        await context.SaveChangesAsync();
+        return true;
     }
 }

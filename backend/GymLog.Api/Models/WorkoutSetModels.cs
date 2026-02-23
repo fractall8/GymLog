@@ -27,4 +27,6 @@ public class UpdateSetModel
 {
     public double Weight { get; set; }
     public int Reps { get; set; }
+    
+    public WorkoutSetType Type { get; set; }
 }

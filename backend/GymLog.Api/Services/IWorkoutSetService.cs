@@ -8,5 +8,5 @@ public interface IWorkoutSetService
     
     Task<bool> UpdateSetAsync(Guid userId, Guid setId, UpdateSetModel model);
 
-    Task DeleteSetAsync(Guid userId, Guid setId);
+    Task<bool> DeleteSetAsync(Guid userId, Guid setId);
 }
