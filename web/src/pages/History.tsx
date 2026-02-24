@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../api/api";
+import api from "@/api/api";
 import { Calendar, Clock, ChevronRight, Dumbbell } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -70,7 +70,8 @@ export const History = () => {
           </div>
         ) : (
           workouts.map((workout) => (
-            <Link to={`/workouts/${workout.id}`}
+            <Link
+              to={`/workouts/${workout.id}`}
               key={workout.id}
               className="block bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:cursor-pointer hover:shadow-md transition-shadow group"
             >

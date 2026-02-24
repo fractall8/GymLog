@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/context";
 import { useNavigate, Link } from "react-router-dom";
 import type { AxiosError } from "axios";
 import { AlertCircle } from "lucide-react";

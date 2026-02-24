@@ -1,28 +1,19 @@
 import { useEffect, useState } from "react";
-import api from "../api/api";
-import { Plus, CheckCircle2, Trash2, XCircle, Pencil, Check, Play } from "lucide-react";
-
-type SetType = 'Warmup' | 'Normal' | 'Failure';
-
-interface WorkoutSet {
-  id: string;
-  exerciseId: string;
-  exerciseName: string;
-  weight: number;
-  reps: number;
-  type: SetType;
-}
-
-interface Workout {
-  id: string;
-  name: string;
-  description?: string;
-  sets: WorkoutSet[];
-}
+import api from "@/api/api";
+import {
+  Plus,
+  CheckCircle2,
+  Trash2,
+  XCircle,
+  Pencil,
+  Check,
+  Play,
+} from "lucide-react";
+import type { Workout, Exercise, WorkoutSet, SetType } from "@/types";
 
 export const Workouts = () => {
   const [activeWorkout, setActiveWorkout] = useState<Workout | null>(null);
-  const [exercises, setExercises] = useState<any[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [showExerciseSelector, setShowExerciseSelector] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +34,7 @@ export const Workouts = () => {
         setEditedDescription(res.data.description || "");
       }
     } catch (e) {
-      console.log("No active workout found");
+      console.log("No active workout found: ", e);
     } finally {
       setLoading(false);
     }
@@ -55,6 +46,7 @@ export const Workouts = () => {
       setExercises(res.data);
       setShowExerciseSelector(true);
     } catch (e) {
+      console.log("Failed to load exercises: ", e);
       alert("Failed to load exercises. Please try again.");
     }
   };
@@ -62,22 +54,28 @@ export const Workouts = () => {
   const startWorkout = async () => {
     try {
       const res = await api.post("/workouts", {
-        name: `Session ${new Date().toLocaleDateString()}`
+        name: `Session ${new Date().toLocaleDateString()}`,
       });
       setActiveWorkout(res.data);
       setEditedName(res.data.name);
       setEditedDescription("");
     } catch (e) {
+      console.log("Failed to start workout: ", e);
       alert("Failed to start workout");
     }
   };
 
   const cancelWorkout = async () => {
-    if (!activeWorkout || !window.confirm("Cancel workout? All current progress will be lost.")) return;
+    if (
+      !activeWorkout ||
+      !window.confirm("Cancel workout? All current progress will be lost.")
+    )
+      return;
     try {
       await api.delete(`/workouts/${activeWorkout.id}`);
       setActiveWorkout(null);
     } catch (e) {
+      console.log("Failed to cancel workout: ", e);
       alert("Failed to cancel workout");
     }
   };
@@ -87,6 +85,7 @@ export const Workouts = () => {
       await api.patch("/workouts/finish");
       setActiveWorkout(null);
     } catch (e) {
+      console.log("Failed to finish workout: ", e);
       alert("Failed to finish workout");
     }
   };
@@ -98,13 +97,14 @@ export const Workouts = () => {
         exerciseId,
         weight: 0,
         reps: 0,
-        type: 'Normal'
+        type: "Normal",
       });
       setActiveWorkout({
         ...activeWorkout,
-        sets: [...activeWorkout.sets, res.data]
+        sets: [...activeWorkout.sets, res.data],
       });
     } catch (e) {
+      console.log("Failed to add set: ", e);
       alert("Failed to add set");
     }
   };
@@ -115,25 +115,35 @@ export const Workouts = () => {
       await api.delete(`/workouts/${activeWorkout.id}/sets/${setId}`);
       setActiveWorkout({
         ...activeWorkout,
-        sets: activeWorkout.sets.filter(s => s.id !== setId)
+        sets: activeWorkout.sets.filter((s) => s.id !== setId),
       });
     } catch (e) {
+      console.log("Failed to delete set: ", e);
       alert("Failed to delete set");
     }
   };
 
-  const updateSetData = async (setId: string, weight: number, reps: number, type: SetType) => {
+  const updateSetData = async (
+    setId: string,
+    weight: number,
+    reps: number,
+    type: SetType,
+  ) => {
     if (!activeWorkout) return;
     try {
-      await api.put(`/workouts/${activeWorkout.id}/sets/${setId}`, { weight, reps, type });
+      await api.put(`/workouts/${activeWorkout.id}/sets/${setId}`, {
+        weight,
+        reps,
+        type,
+      });
       setActiveWorkout({
         ...activeWorkout,
-        sets: activeWorkout.sets.map(s =>
-          s.id === setId ? { ...s, weight, reps, type } : s
-        )
+        sets: activeWorkout.sets.map((s) =>
+          s.id === setId ? { ...s, weight, reps, type } : s,
+        ),
       });
     } catch (e) {
-      console.error("Failed to update set");
+      console.log("Failed to update set: ", e);
     }
   };
 
@@ -142,42 +152,60 @@ export const Workouts = () => {
     try {
       await api.put(`/workouts/${activeWorkout.id}`, {
         name: editedName || activeWorkout.name,
-        description: editedDescription
+        description: editedDescription,
       });
-      setActiveWorkout({ ...activeWorkout, name: editedName, description: editedDescription });
+      setActiveWorkout({
+        ...activeWorkout,
+        name: editedName,
+        description: editedDescription,
+      });
       setIsEditing(false);
     } catch (e) {
+      console.log("Failed to update workout info: ", e);
       alert("Failed to update workout info");
     }
   };
 
-  const groupedSets = activeWorkout?.sets.reduce((acc: Record<string, { name: string, sets: WorkoutSet[] }>, set: WorkoutSet) => {
-    if (!acc[set.exerciseId]) acc[set.exerciseId] = { name: set.exerciseName, sets: [] };
-    acc[set.exerciseId].sets.push(set);
-    return acc;
-  }, {});
-
-  if (loading) return (
-    <div className="flex justify-center py-20">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-    </div>
+  const groupedSets = activeWorkout?.sets.reduce(
+    (
+      acc: Record<string, { name: string; sets: WorkoutSet[] }>,
+      set: WorkoutSet,
+    ) => {
+      if (!acc[set.exerciseId])
+        acc[set.exerciseId] = { name: set.exerciseName, sets: [] };
+      acc[set.exerciseId].sets.push(set);
+      return acc;
+    },
+    {},
   );
 
-  if (!activeWorkout) return (
-    <div className="max-w-xl mx-auto text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm">
-      <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-        <Play size={32} />
+  if (loading)
+    return (
+      <div className="flex justify-center py-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
       </div>
-      <h2 className="text-2xl font-bold text-slate-900 mb-2">Ready for a session?</h2>
-      <p className="text-slate-500 mb-8">Start tracking your workout to see your progress.</p>
-      <button
-        onClick={startWorkout}
-        className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100"
-      >
-        Start New Workout
-      </button>
-    </div>
-  );
+    );
+
+  if (!activeWorkout)
+    return (
+      <div className="max-w-xl mx-auto text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm">
+        <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <Play size={32} />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+          Ready for a session?
+        </h2>
+        <p className="text-slate-500 mb-8">
+          Start tracking your workout to see your progress.
+        </p>
+        <button
+          onClick={startWorkout}
+          className="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100"
+        >
+          Start New Workout
+        </button>
+      </div>
+    );
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -209,17 +237,30 @@ export const Workouts = () => {
             ) : (
               <div className="group">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-bold text-slate-900">{activeWorkout.name}</h2>
-                  <button onClick={() => setIsEditing(true)} className="p-1 text-slate-400 hover:cursor-pointer hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition">
+                  <h2 className="text-2xl font-bold text-slate-900">
+                    {activeWorkout.name}
+                  </h2>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="p-1 text-slate-400 hover:cursor-pointer hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition"
+                  >
                     <Pencil size={16} />
                   </button>
                 </div>
-                {activeWorkout.description && <p className="text-slate-500 mt-1 text-sm">{activeWorkout.description}</p>}
+                {activeWorkout.description && (
+                  <p className="text-slate-500 mt-1 text-sm">
+                    {activeWorkout.description}
+                  </p>
+                )}
               </div>
             )}
           </div>
           <div className="flex gap-2">
-            <button onClick={cancelWorkout} className="p-2 text-slate-400 hover:cursor-pointer hover:text-red-600 transition" title="Cancel">
+            <button
+              onClick={cancelWorkout}
+              className="p-2 text-slate-400 hover:cursor-pointer hover:text-red-600 transition"
+              title="Cancel"
+            >
               <XCircle size={24} />
             </button>
             <button
@@ -234,18 +275,33 @@ export const Workouts = () => {
 
       <div className="space-y-4">
         {Object.entries(groupedSets || {}).map(([exId, data]) => (
-          <div key={exId} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+          <div
+            key={exId}
+            className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm"
+          >
             <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700">
               {data.name}
             </div>
             <div className="p-4 space-y-2">
               {data.sets.map((set, index) => (
-                <div key={set.id} className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl">
-                  <span className="w-8 text-xs font-black text-slate-400 text-center">#{index + 1}</span>
+                <div
+                  key={set.id}
+                  className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl"
+                >
+                  <span className="w-8 text-xs font-black text-slate-400 text-center">
+                    #{index + 1}
+                  </span>
 
                   <select
                     value={set.type}
-                    onChange={(e) => updateSetData(set.id, set.weight, set.reps, e.target.value as SetType)}
+                    onChange={(e) =>
+                      updateSetData(
+                        set.id,
+                        set.weight,
+                        set.reps,
+                        e.target.value as SetType,
+                      )
+                    }
                     className="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 transition"
                   >
                     <option value="Warmup">Warmup</option>
@@ -255,33 +311,54 @@ export const Workouts = () => {
 
                   <div className="w-full flex justify-end">
                     <div className="flex items-center gap-1.5 sm:gap-3 flex-nowrap min-w-0">
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="number"
-                        step="0.5"
-                        placeholder="0"
-                        className="w-14 sm:w-20 bg-white border border-slate-200 rounded-lg p-1.5 text-center font-bold outline-none focus:border-indigo-500 transition text-sm sm:text-base"
-                        defaultValue={set.weight}
-                        onBlur={(e) => updateSetData(set.id, parseFloat(e.target.value) || 0, set.reps, set.type)}
-                      />
-                      <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-tighter">kg</span>
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          step="0.5"
+                          placeholder="0"
+                          className="w-14 sm:w-20 bg-white border border-slate-200 rounded-lg p-1.5 text-center font-bold outline-none focus:border-indigo-500 transition text-sm sm:text-base"
+                          defaultValue={set.weight}
+                          onBlur={(e) =>
+                            updateSetData(
+                              set.id,
+                              parseFloat(e.target.value) || 0,
+                              set.reps,
+                              set.type,
+                            )
+                          }
+                        />
+                        <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-tighter">
+                          kg
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          placeholder="0"
+                          className="w-12 sm:w-16 bg-white border border-slate-200 rounded-lg p-1.5 text-center font-bold outline-none focus:border-indigo-500 transition text-sm sm:text-base"
+                          defaultValue={set.reps}
+                          onBlur={(e) =>
+                            updateSetData(
+                              set.id,
+                              set.weight,
+                              parseInt(e.target.value) || 0,
+                              set.type,
+                            )
+                          }
+                        />
+                        <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-tighter">
+                          reps
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="number"
-                        placeholder="0"
-                        className="w-12 sm:w-16 bg-white border border-slate-200 rounded-lg p-1.5 text-center font-bold outline-none focus:border-indigo-500 transition text-sm sm:text-base"
-                        defaultValue={set.reps}
-                        onBlur={(e) => updateSetData(set.id, set.weight, parseInt(e.target.value) || 0, set.type)}
-                      />
-                      <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-tighter">reps</span>
-                    </div>
-                  </div>
-
-                  <button onClick={() => deleteSet(set.id)} className="p-2 text-slate-300 hover:text-red-500 transition">
-                    <Trash2 size={18} />
-                  </button>
+                    <button
+                      onClick={() => deleteSet(set.id)}
+                      className="p-2 text-slate-300 hover:text-red-500 transition"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -307,9 +384,11 @@ export const Workouts = () => {
       {showExerciseSelector && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-100">
           <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">Select Exercise</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-4">
+              Select Exercise
+            </h3>
             <div className="max-h-80 overflow-y-auto space-y-1 mb-6 pr-2">
-              {exercises.map(ex => (
+              {exercises.map((ex) => (
                 <button
                   key={ex.id}
                   onClick={() => {

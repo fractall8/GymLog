@@ -29,18 +29,6 @@ export const Layout = ({ children }: { children: ReactNode }) => {
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-8">
-            <Link
-              to="/"
-              className="flex items-center gap-2 font-bold text-xl text-slate-900"
-            >
-              <div className="p-1.5 bg-indigo-600 rounded-lg">
-                <Dumbbell className="text-white" size={20} />
-              </div>
-              <span className="hidden xs:inline">
-                Gym<span className="text-indigo-600">Log</span>
-              </span>
-            </Link>
-
             <div className="flex items-center gap-1">
               {navLinks.map((link) => (
                 <Link
