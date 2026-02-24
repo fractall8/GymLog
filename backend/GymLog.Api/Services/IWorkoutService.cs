@@ -8,6 +8,8 @@ public interface IWorkoutService
     
     Task<WorkoutModel?> GetActiveWorkoutAsync(Guid userId);
     
+    Task<WorkoutModel?> GetWorkoutByIdAsync(Guid userId, Guid workoutId);
+    
     Task<bool> UpdateWorkoutAsync(Guid userId, Guid workoutId, UpdateWorkoutModel model);
     
     Task<bool> FinishWorkoutAsync(Guid userId);

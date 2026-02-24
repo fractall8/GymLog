@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
 import { Calendar, Clock, ChevronRight, Dumbbell } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface WorkoutSet {
   id: string;
@@ -69,9 +70,9 @@ export const History = () => {
           </div>
         ) : (
           workouts.map((workout) => (
-            <div
+            <Link to={`/workouts/${workout.id}`}
               key={workout.id}
-              className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:cursor-pointer hover:shadow-md transition-shadow group"
+              className="block bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:cursor-pointer hover:shadow-md transition-shadow group"
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -110,7 +111,7 @@ export const History = () => {
                   </span>
                 )}
               </div>
-            </div>
+            </Link>
           ))
         )}
       </div>

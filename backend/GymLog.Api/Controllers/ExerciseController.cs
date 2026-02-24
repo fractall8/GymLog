@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using GymLog.Api.Models;
+﻿using GymLog.Api.Models;
 using GymLog.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

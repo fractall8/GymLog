@@ -66,6 +66,34 @@ public class WorkoutService(GymLogDbContext context) : IWorkoutService
         return workout;
     }
 
+    public async Task<WorkoutModel?> GetWorkoutByIdAsync(Guid userId, Guid workoutId)
+    {
+        return await context.Workouts
+            .Where(w => w.Id == workoutId && w.UserId == userId)
+            .Include(w => w.WorkoutSets)
+            .ThenInclude(s => s.Exercise)
+            .AsNoTracking()
+            .Select(w => new WorkoutModel
+            {
+                Id = w.Id,
+                Name = w.Name,
+                Description = w.Description,
+                StartedAt = w.StartedAt,
+                FinishedAt = w.FinishedAt,
+                Sets = w.WorkoutSets.Select(s => new WorkoutSetModel
+                {
+                    Id = s.Id,
+                    ExerciseId = s.ExerciseId,
+                    ExerciseName = s.Exercise.Name,
+                    Weight = s.Weight,
+                    Reps = s.Reps,
+                    Type = s.Type,
+                    CreatedAt = s.CreatedAt
+                }).OrderBy(s => s.CreatedAt).ToList()
+            })
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<bool> UpdateWorkoutAsync(Guid userId, Guid workoutId, UpdateWorkoutModel model)
     {
         var workout = await context.Workouts

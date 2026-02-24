@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using GymLog.Api.Models;
+﻿using GymLog.Api.Models;
 using GymLog.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +28,19 @@ public class WorkoutsController(IWorkoutService workoutService) : BaseController
         var workouts = await workoutService.GetWorkoutsAsync(CurrentUserId);
         
         return Ok(workouts);
+    }
+    
+    [HttpGet("{id}")]
+    public async Task<ActionResult<WorkoutModel>> GetWorkoutById(Guid id)
+    {
+        var workout = await workoutService.GetWorkoutByIdAsync(CurrentUserId, id);
+        
+        if (workout == null)
+        {
+            return NotFound();
+        }
+        
+        return Ok(workout);
     }
 
     [HttpPost]
