@@ -5,4 +5,5 @@ export * from "./Workouts";
 export * from "./History";
 export * from "./Exercises";
 export * from "./WorkoutDetails";
+export * from "./ExerciseDetails";
 export * from "./NotFound";

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
 import { Search, Plus, Dumbbell, X, Check } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface Exercise {
   id: string;
@@ -88,8 +89,9 @@ export const Exercises = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredExercises.map((ex) => (
-          <div
+          <Link
             key={ex.id}
+            to={`/exercises/${ex.id}`}
             className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all group"
           >
             <div className="flex justify-between items-start mb-4">
@@ -110,7 +112,7 @@ export const Exercises = () => {
             <p className="text-slate-500 text-sm leading-relaxed line-clamp-3">
               {ex.description || "No description provided."}
             </p>
-          </div>
+          </Link>
         ))}
       </div>
 

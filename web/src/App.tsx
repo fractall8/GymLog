@@ -11,6 +11,7 @@ import {
   Exercises,
   WorkoutDetails,
   NotFound,
+  ExerciseDetails,
 } from "@/pages";
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
             <Route path="/workouts/:id" element={<WorkoutDetails />} />
             <Route path="/history" element={<History />} />
             <Route path="/exercises" element={<Exercises />} />
+            <Route path="/exercises/:id" element={<ExerciseDetails />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
