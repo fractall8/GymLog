@@ -3,12 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context";
 import { UserPlus, Mail, Lock, User, AlertCircle } from "lucide-react";
 import { AxiosError } from "axios";
-
-// move types into separate file
-interface RegisterApiErrorResponse {
-  errors?: string[];
-  message?: string;
-}
+import type { RegisterApiErrorResponse } from "@/types/responses";
 
 export const Register = () => {
   const [userName, setUserName] = useState("");

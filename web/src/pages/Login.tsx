@@ -3,11 +3,7 @@ import { useAuth } from "@/context";
 import { useNavigate, Link } from "react-router-dom";
 import type { AxiosError } from "axios";
 import { AlertCircle } from "lucide-react";
-
-interface LoginApiErrorResponse {
-  error?: string;
-  message?: string;
-}
+import type { LoginApiErrorResponse } from "@/types/responses";
 
 export const Login = () => {
   const [email, setEmail] = useState("");

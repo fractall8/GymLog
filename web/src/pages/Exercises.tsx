@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import api from "../api/api";
 import { Search, Plus, Dumbbell, X, Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import type { ValidationApiErrorResponse } from "@/types/responses";
+import type { AxiosError } from "axios";
 
 interface Exercise {
   id: string;
@@ -17,6 +19,9 @@ export const Exercises = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [newExercise, setNewExercise] = useState({ name: "", description: "" });
+  const [validationErrors, setValidationErrors] = useState<{
+    [key: string]: string[];
+  } | null>(null);
 
   useEffect(() => {
     fetchExercises();
@@ -35,13 +40,24 @@ export const Exercises = () => {
 
   const handleCreateExercise = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationErrors(null);
+
     try {
       await api.post("/exercises", newExercise);
       setIsModalOpen(false);
       setNewExercise({ name: "", description: "" });
       fetchExercises();
     } catch (e) {
-      console.log("Failed to create exercise: ", e);
+      const axiosError = e as AxiosError<ValidationApiErrorResponse>;
+
+      if (
+        axiosError.response?.status === 400 &&
+        axiosError.response.data?.errors
+      ) {
+        setValidationErrors(axiosError.response.data.errors);
+      } else {
+        console.log("Failed to create exercise: ", e);
+      }
     }
   };
 
@@ -143,6 +159,11 @@ export const Exercises = () => {
                     setNewExercise({ ...newExercise, name: e.target.value })
                   }
                 />
+                {validationErrors?.Name && (
+                  <p className="text-red-500 text-xs font-bold mt-1.5 ml-1 animate-in fade-in slide-in-from-top-1">
+                    {validationErrors.Name[0]}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">
@@ -159,6 +180,11 @@ export const Exercises = () => {
                     })
                   }
                 />
+                {validationErrors?.Description && (
+                  <p className="text-red-500 text-xs font-bold mt-1.5 ml-1">
+                    {validationErrors.Description[0]}
+                  </p>
+                )}
               </div>
               <button className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 mt-4">
                 <Check size={20} /> Create Exercise
