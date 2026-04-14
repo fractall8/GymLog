@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
-using GymLog.Api.Models;
-using GymLog.Api.Services;
+using Application.Interfaces;
+using Application.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymLog.Api.Controllers;

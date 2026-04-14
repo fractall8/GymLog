@@ -1,11 +1,12 @@
 using System.Text;
-using GymLog.Api.Entities;
-using GymLog.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.Json.Serialization;
+using Application.Interfaces;
+using Infrastructure.Data;
+using Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
