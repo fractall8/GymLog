@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context";
 import { useNavigate, Link } from "react-router-dom";
-import type { AxiosError } from "axios";
+import type { ApiError } from "@/api/api";
 import { AlertCircle } from "lucide-react";
 import type { LoginApiErrorResponse } from "@/types/responses";
 
@@ -20,7 +20,7 @@ export const Login = () => {
       await login(email, password);
       navigate("/workouts");
     } catch (ex) {
-      const axiosError = ex as AxiosError<LoginApiErrorResponse>;
+      const axiosError = ex as ApiError<LoginApiErrorResponse>;
 
       const serverError = axiosError.response?.data?.error;
       const genericMessage =

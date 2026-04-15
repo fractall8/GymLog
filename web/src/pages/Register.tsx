@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context";
 import { UserPlus, Mail, Lock, User, AlertCircle } from "lucide-react";
-import { AxiosError } from "axios";
+import { ApiError } from "@/api/api";
 import type { RegisterApiErrorResponse } from "@/types/responses";
 
 export const Register = () => {
@@ -23,7 +23,7 @@ export const Register = () => {
       await register(userName, email, password);
       navigate("/workouts");
     } catch (err) {
-      const axiosError = err as AxiosError<RegisterApiErrorResponse>;
+      const axiosError = err as ApiError<RegisterApiErrorResponse>;
 
       const serverErrors = axiosError.response?.data?.errors;
       const genericMessage =

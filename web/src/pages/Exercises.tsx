@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import api from "../api/api";
+import api from "@/api/api";
 import { Search, Plus, Dumbbell, X, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { ValidationApiErrorResponse } from "@/types/responses";
-import type { AxiosError } from "axios";
+import type { ApiError } from "@/api/api";
 
 interface Exercise {
   id: string;
@@ -48,7 +48,7 @@ export const Exercises = () => {
       setNewExercise({ name: "", description: "" });
       fetchExercises();
     } catch (e) {
-      const axiosError = e as AxiosError<ValidationApiErrorResponse>;
+      const axiosError = e as ApiError<ValidationApiErrorResponse>;
 
       if (
         axiosError.response?.status === 400 &&
