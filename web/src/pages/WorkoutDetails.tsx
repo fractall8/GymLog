@@ -5,13 +5,13 @@ import {
   Calendar,
   Clock,
   ArrowLeft,
-  Dumbbell,
   Thermometer,
   Play,
   Flame,
   AlignLeft,
 } from "lucide-react";
 import type { Workout, WorkoutSet } from "@/types";
+import { Badge, Button } from "@/components/ui";
 
 type GroupedSets = Record<string, { name: string; sets: WorkoutSet[] }>;
 
@@ -32,7 +32,7 @@ export const WorkoutDetails = () => {
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("en-US", {
       day: "numeric",
-      month: "long",
+      month: "short",
       year: "numeric",
     });
 
@@ -44,9 +44,7 @@ export const WorkoutDetails = () => {
 
   if (loading)
     return (
-      <div className="p-10 text-center font-bold text-slate-400">
-        Loading workout...
-      </div>
+      <div className="p-10 text-center text-zinc-400">Loading workout...</div>
     );
 
   const groupedSets = workout?.sets.reduce(
@@ -54,7 +52,6 @@ export const WorkoutDetails = () => {
       if (!acc[set.exerciseId]) {
         acc[set.exerciseId] = { name: set.exerciseName, sets: [] };
       }
-
       acc[set.exerciseId].sets.push(set);
       return acc;
     },
@@ -62,109 +59,97 @@ export const WorkoutDetails = () => {
   );
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-500">
-      <button
+    <div className="max-w-2xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">
+      <Button
+        variant="ghost"
         onClick={() => navigate("/history")}
-        className="flex items-center gap-2 text-slate-500 hover:cursor-pointer hover:text-indigo-600 font-bold transition-colors"
+        className="text-zinc-500 hover:text-zinc-900 -ml-4"
       >
-        <ArrowLeft size={20} /> Back to History
-      </button>
+        <ArrowLeft size={16} /> Back to History
+      </Button>
 
       {workout && (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-8 bg-slate-50 border-b border-slate-100">
-            <h1 className="text-3xl font-black text-slate-900 mb-2">
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+          {/* Header */}
+          <div className="p-6 bg-zinc-50/50 border-b border-zinc-100">
+            <h1 className="text-2xl font-medium text-zinc-900 mb-3">
               {workout.name}
             </h1>
-            <div className="flex flex-wrap gap-4 text-sm font-bold text-slate-500">
+            <div className="flex flex-wrap gap-4 text-xs text-zinc-500">
               <span className="flex items-center gap-1.5">
-                <Calendar size={16} /> {formatDate(workout.startedAt)}
+                <Calendar size={14} /> {formatDate(workout.startedAt)}
               </span>
               <span className="flex items-center gap-1.5">
-                <Clock size={16} />{" "}
+                <Clock size={14} />{" "}
                 {calculateDuration(workout.startedAt, workout.finishedAt)}
               </span>
             </div>
+
             {workout.description && (
-              <div className="mt-4 p-4 bg-white rounded-2xl border border-slate-200 text-slate-600 text-sm flex gap-2">
-                <AlignLeft size={16} className="shrink-0 mt-0.5" />
+              <div className="mt-4 p-3 bg-white rounded-lg border border-zinc-200 text-zinc-600 text-sm flex gap-2">
+                <AlignLeft
+                  size={16}
+                  className="shrink-0 text-zinc-400 mt-0.5"
+                />
                 {workout.description}
               </div>
             )}
           </div>
 
-          <div className="p-8 space-y-8">
+          {/* Exercises */}
+          <div className="p-6 space-y-6">
             {Object.entries(groupedSets || {}).map(
               ([exId, data]: [
                 string,
                 { name: string; sets: WorkoutSet[] },
               ]) => (
-                <div key={exId} className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
-                      <Dumbbell size={20} />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900">
-                      {data.name}
-                    </h3>
-                  </div>
+                <div key={exId} className="space-y-3">
+                  <h3 className="text-sm font-medium text-zinc-900 pb-2 border-b border-zinc-100">
+                    {data.name}
+                  </h3>
 
-                  <div className="grid gap-2">
+                  <div className="grid gap-1.5">
                     {data.sets.map((set: WorkoutSet, index: number) => (
                       <div
                         key={set.id}
-                        className="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-100"
+                        className="flex items-center justify-between py-2 px-3 hover:bg-zinc-50 rounded-lg transition-colors group"
                       >
-                        <span className="w-6 text-xs font-black text-slate-300">
-                          #{index + 1}
-                        </span>
+                        <div className="flex items-center gap-4">
+                          <span className="w-4 text-xs font-medium text-zinc-400">
+                            {index + 1}
+                          </span>
 
-                        <div className="flex items-center gap-2 min-w-25">
-                          {set.type === "Warmup" && (
-                            <>
-                              <Thermometer
-                                size={14}
-                                className="text-blue-500"
-                              />{" "}
-                              <span className="text-[10px] font-bold uppercase text-blue-500">
-                                Warmup
-                              </span>
-                            </>
-                          )}
-                          {set.type === "Normal" && (
-                            <>
-                              <Play size={14} className="text-slate-400" />{" "}
-                              <span className="text-[10px] font-bold uppercase text-slate-400">
-                                Normal
-                              </span>
-                            </>
-                          )}
-                          {set.type === "Failure" && (
-                            <>
-                              <Flame size={14} className="text-orange-500" />{" "}
-                              <span className="text-[10px] font-bold uppercase text-orange-500">
-                                Failure
-                              </span>
-                            </>
-                          )}
+                          <div className="w-20">
+                            {set.type === "Warmup" && (
+                              <Badge variant="warmup">
+                                <Thermometer size={12} /> Warmup
+                              </Badge>
+                            )}
+                            {set.type === "Normal" && (
+                              <Badge variant="default">
+                                <Play size={12} /> Normal
+                              </Badge>
+                            )}
+                            {set.type === "Failure" && (
+                              <Badge variant="failure">
+                                <Flame size={12} /> Failure
+                              </Badge>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="flex gap-4 ml-auto">
-                          <div className="text-right">
-                            <span className="text-lg font-black text-slate-900">
+                        <div className="flex gap-6 text-sm">
+                          <div className="text-right w-16">
+                            <span className="font-medium text-zinc-900">
                               {set.weight}
                             </span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase ml-1">
-                              kg
-                            </span>
+                            <span className="text-zinc-400 ml-1">kg</span>
                           </div>
-                          <div className="text-right min-w-15">
-                            <span className="text-lg font-black text-slate-900">
+                          <div className="text-right w-16">
+                            <span className="font-medium text-zinc-900">
                               {set.reps}
                             </span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase ml-1">
-                              reps
-                            </span>
+                            <span className="text-zinc-400 ml-1">reps</span>
                           </div>
                         </div>
                       </div>

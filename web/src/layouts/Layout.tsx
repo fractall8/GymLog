@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/context";
 import {
   Dumbbell,
   LogOut,
@@ -25,44 +25,48 @@ export const Layout = ({ children }: { children: ReactNode }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex justify-between items-center">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
-                    location.pathname === link.path
-                      ? "bg-indigo-50 text-indigo-600"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
-                  }`}
-                >
-                  <link.icon size={18} />
-                  {link.name}
-                </Link>
-              ))}
+    <div className="min-h-screen bg-zinc-50 flex flex-col">
+      <nav className="bg-white border-b border-zinc-200 sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex justify-between items-center">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-1 sm:gap-2">
+              {navLinks.map((link) => {
+                const isActive = location.pathname.startsWith(link.path);
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-blue-50 text-blue-700"
+                        : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
+                    }`}
+                  >
+                    <link.icon size={16} />
+                    <span className="hidden sm:inline">{link.name}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="hidden md:inline text-slate-600 font-medium text-sm">
-              Hi, {user}!
+            <span className="hidden md:inline text-zinc-600 font-medium text-sm">
+              {user}
             </span>
             <button
               onClick={handleLogout}
-              className="flex gap-2 items-center p-2 text-slate-400 hover:cursor-pointer hover:text-red-600 transition-colors"
+              className="flex gap-2 items-center p-1.5 text-zinc-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
               title="Logout"
             >
-              <LogOut size={20} />
-              <p>Logout</p>
+              <LogOut size={18} />
             </button>
           </div>
         </div>
       </nav>
-      <main className="max-w-5xl mx-auto p-6">{children}</main>
+      <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6">
+        {children}
+      </main>
     </div>
   );
 };

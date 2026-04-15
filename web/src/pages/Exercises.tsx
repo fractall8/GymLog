@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "@/api/api";
-import { Search, Plus, Dumbbell, X, Check } from "lucide-react";
+import { Search, Plus, Dumbbell, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { ValidationApiErrorResponse } from "@/types/responses";
 import type { ApiError } from "@/api/api";
+import { Button, Badge } from "@/components/ui";
 
 interface Exercise {
   id: string;
@@ -41,7 +42,6 @@ export const Exercises = () => {
   const handleCreateExercise = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationErrors(null);
-
     try {
       await api.post("/exercises", newExercise);
       setIsModalOpen(false);
@@ -49,14 +49,11 @@ export const Exercises = () => {
       fetchExercises();
     } catch (e) {
       const axiosError = e as ApiError<ValidationApiErrorResponse>;
-
       if (
         axiosError.response?.status === 400 &&
         axiosError.response.data?.errors
       ) {
         setValidationErrors(axiosError.response.data.errors);
-      } else {
-        console.log("Failed to create exercise: ", e);
       }
     }
   };
@@ -67,65 +64,56 @@ export const Exercises = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-      </div>
+      <div className="flex justify-center py-20 text-zinc-400">Loading...</div>
     );
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div className="max-w-4xl mx-auto pb-20">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black text-slate-900">Exercises</h1>
-          <p className="text-slate-500 font-medium">
+          <h1 className="text-2xl font-medium text-zinc-900">Exercises</h1>
+          <p className="text-zinc-500 text-sm mt-1">
             Explore standard moves or create your own.
           </p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center gap-2"
-        >
-          <Plus size={20} /> Add Custom
-        </button>
+        <Button onClick={() => setIsModalOpen(true)}>
+          <Plus size={16} /> Add Custom
+        </Button>
       </header>
 
-      <div className="relative mb-8">
+      <div className="relative mb-6">
         <Search
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-          size={20}
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
+          size={18}
         />
         <input
           type="text"
           placeholder="Search exercises..."
-          className="w-full bg-white border border-slate-200 pl-12 pr-4 py-4 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
+          className="w-full bg-white border border-zinc-200 pl-10 pr-4 py-2.5 rounded-xl shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition text-sm"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredExercises.map((ex) => (
           <Link
             key={ex.id}
             to={`/exercises/${ex.id}`}
-            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all group"
+            className="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm hover:border-blue-300 transition-colors group flex flex-col"
           >
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-3">
               <div
-                className={`p-3 rounded-2xl ${ex.userId ? "bg-emerald-50 text-emerald-600" : "bg-indigo-50 text-indigo-600"}`}
+                className={`p-2 rounded-lg ${ex.userId ? "bg-blue-50 text-blue-600" : "bg-zinc-100 text-zinc-600"}`}
               >
-                <Dumbbell size={24} />
+                <Dumbbell size={18} />
               </div>
-              {ex.userId && (
-                <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-700 px-2 py-1 rounded-lg">
-                  Custom
-                </span>
-              )}
+              {ex.userId && <Badge variant="secondary">Custom</Badge>}
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
+            <h3 className="text-base font-medium text-zinc-900 mb-1.5 group-hover:text-blue-600 transition-colors">
               {ex.name}
             </h3>
-            <p className="text-slate-500 text-sm leading-relaxed line-clamp-3">
+            <p className="text-zinc-500 text-sm leading-relaxed line-clamp-2 mt-auto">
               {ex.description || "No description provided."}
             </p>
           </Link>
@@ -133,26 +121,28 @@ export const Exercises = () => {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-100 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-slate-900">New Exercise</h2>
+        <div className="fixed inset-0 bg-zinc-900/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-sm rounded-xl shadow-lg overflow-hidden">
+            <div className="px-5 py-4 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/50">
+              <h2 className="text-lg font-medium text-zinc-900">
+                New Exercise
+              </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-zinc-400 hover:text-zinc-600"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleCreateExercise} className="p-6 space-y-4">
+            <form onSubmit={handleCreateExercise} className="p-5 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5 ml-1">
                   Exercise Name
                 </label>
                 <input
                   autoFocus
                   required
-                  className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                  className="w-full bg-transparent border border-zinc-200 px-3 py-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition text-sm text-zinc-900"
                   placeholder="e.g., Bench Press"
                   value={newExercise.name}
                   onChange={(e) =>
@@ -160,17 +150,17 @@ export const Exercises = () => {
                   }
                 />
                 {validationErrors?.Name && (
-                  <p className="text-red-500 text-xs font-bold mt-1.5 ml-1 animate-in fade-in slide-in-from-top-1">
+                  <p className="text-red-500 text-xs mt-1.5">
                     {validationErrors.Name[0]}
                   </p>
                 )}
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">
+                <label className="block text-xs font-medium text-zinc-500 mb-1.5 ml-1">
                   Description (Optional)
                 </label>
                 <textarea
-                  className="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition h-32 resize-none"
+                  className="w-full bg-transparent border border-zinc-200 px-3 py-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition h-24 resize-none text-sm text-zinc-900"
                   placeholder="How to perform this exercise..."
                   value={newExercise.description}
                   onChange={(e) =>
@@ -180,15 +170,10 @@ export const Exercises = () => {
                     })
                   }
                 />
-                {validationErrors?.Description && (
-                  <p className="text-red-500 text-xs font-bold mt-1.5 ml-1">
-                    {validationErrors.Description[0]}
-                  </p>
-                )}
               </div>
-              <button className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 mt-4">
-                <Check size={20} /> Create Exercise
-              </button>
+              <Button type="submit" className="w-full mt-2">
+                Create Exercise
+              </Button>
             </form>
           </div>
         </div>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "@/api/api";
-import { ArrowLeft, Dumbbell, Info } from "lucide-react";
+import { ArrowLeft, Dumbbell, AlignLeft } from "lucide-react";
 import type { Exercise } from "@/types";
+import { Button } from "@/components/ui";
 
 export const ExerciseDetails = () => {
   const { id } = useParams();
@@ -20,46 +21,42 @@ export const ExerciseDetails = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-      </div>
+      <div className="flex justify-center py-20 text-zinc-400">Loading...</div>
     );
-
   if (!exercise) return null;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <button
+    <div className="max-w-2xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">
+      <Button
+        variant="ghost"
         onClick={() => navigate("/exercises")}
-        className="flex items-center gap-2 text-slate-500 hover:cursor-pointer hover:text-indigo-600 font-bold transition-colors mb-4"
+        className="text-zinc-500 hover:text-zinc-900 -ml-4"
       >
-        <ArrowLeft size={20} /> Back to Library
-      </button>
+        <ArrowLeft size={16} /> Back to Library
+      </Button>
 
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-8 bg-indigo-600 text-white flex items-center gap-6">
-          <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-md">
-            <Dumbbell size={40} />
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-zinc-100 flex items-start gap-4 bg-zinc-50/50">
+          <div className="bg-white border border-zinc-200 p-3 rounded-xl text-zinc-600 shadow-sm">
+            <Dumbbell size={24} />
           </div>
           <div>
-            <h1 className="text-3xl font-black">{exercise.name}</h1>
-            <p className="text-indigo-100 font-medium">
-              Exercise Guide & History
-            </p>
+            <h1 className="text-2xl font-medium text-zinc-900">
+              {exercise.name}
+            </h1>
+            <p className="text-zinc-500 text-sm mt-1">Exercise Guide</p>
           </div>
         </div>
 
-        <div className="md:col-span-2 space-y-6 p-8">
-          <section>
-            <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900 mb-3">
-              <Info size={20} className="text-indigo-600" />
-              Description
-            </h3>
-            <p className="text-slate-600 leading-relaxed bg-slate-50 p-6 rounded-2xl border border-slate-100">
-              {exercise.description ||
-                "No description available for this exercise yet."}
-            </p>
-          </section>
+        <div className="p-6">
+          <h3 className="flex items-center gap-2 text-sm font-medium text-zinc-900 mb-3">
+            <AlignLeft size={16} className="text-zinc-400" />
+            Description
+          </h3>
+          <div className="text-zinc-600 text-sm leading-relaxed bg-zinc-50/50 p-4 rounded-lg border border-zinc-100">
+            {exercise.description ||
+              "No description available for this exercise yet."}
+          </div>
         </div>
       </div>
     </div>
